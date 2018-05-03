@@ -25,7 +25,7 @@ namespace Elk.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("LMN")]
+        [global::System.Configuration.DefaultSettingValueAttribute("HKS")]
         public string TabName {
             get {
                 return ((string)(this["TabName"]));
@@ -37,7 +37,7 @@ namespace Elk.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("Tools")]
+        [global::System.Configuration.DefaultSettingValueAttribute("Views")]
         public string PanelName {
             get {
                 return ((string)(this["PanelName"]));

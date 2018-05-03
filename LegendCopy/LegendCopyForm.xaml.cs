@@ -15,9 +15,6 @@ namespace Elk
     /// </summary>
     public partial class LegendCopyForm : Window
     {
-        LinearGradientBrush eBrush = null;
-        SolidColorBrush lBrush = new SolidColorBrush(System.Windows.Media.Color.FromArgb(0, 0, 0, 0));
-
         // Revit Info
         Document _doc;
         XYZ _loc;
@@ -59,19 +56,6 @@ namespace Elk
             Close();
         }
 
-        private void closeButton_MouseEnter(object sender, MouseEventArgs e)
-        {
-            if (eBrush == null)
-                eBrush = EnterBrush();
-
-            closeButtonRect.Fill = eBrush;
-        }
-
-        private void closeButton_MouseLeave(object sender, MouseEventArgs e)
-        {
-            closeButtonRect.Fill = lBrush;
-        }
-
         private void okButton_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -95,30 +79,6 @@ namespace Elk
                 Autodesk.Revit.UI.TaskDialog.Show("Error", ex.Message);
             }
             Close();
-        }
-
-        private void okButton_MouseEnter(object sender, MouseEventArgs e)
-        {
-            if (eBrush == null)
-                eBrush = EnterBrush();
-
-            okButtonRect.Fill = eBrush;
-        }
-
-        private void okButton_MouseLeave(object sender, MouseEventArgs e)
-        {
-            okButtonRect.Fill = lBrush;
-        }
-
-        private LinearGradientBrush EnterBrush()
-        {
-            LinearGradientBrush b = new LinearGradientBrush();
-            b.StartPoint = new System.Windows.Point(0, 0);
-            b.EndPoint = new System.Windows.Point(0, 1);
-            b.GradientStops.Add(new GradientStop(System.Windows.Media.Color.FromArgb(255, 195, 195, 195), 0.0));
-            b.GradientStops.Add(new GradientStop(System.Windows.Media.Color.FromArgb(255, 245, 245, 245), 1.0));
-
-            return b;
         }
 
         private void GetSheetParameters()
@@ -183,7 +143,7 @@ namespace Elk
                     try
                     {
                         Parameter param = vs.get_Parameter(filterParam.Definition);
-                        if (null != param && (param.AsString().Contains(filterTextBox.Text) || param.AsValueString().Contains(filterTextBox.Text)))
+                        if (null != param && (param.AsString().ToLower().Contains(filterTextBox.Text.ToLower()) || param.AsValueString().ToLower().Contains(filterTextBox.Text.ToLower())))
                         {
                             tempSheets.Add(vs);
                         }

@@ -9,6 +9,7 @@ using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Selection;
 using System.Windows.Media.Imaging;
+using RevitCommon.Attributes;
 
 namespace Elk
 {
@@ -72,6 +73,9 @@ namespace Elk
                 }
                 else
                     TaskDialog.Show("Warning - 0", "Make sure only one Legend Viewport is selected before running this command.");
+
+                RevitCommon.HKS.WriteToHome("Legend Copy", commandData.Application.Application.VersionNumber, commandData.Application.Application.Username);
+
                 return Result.Succeeded;
             }
             catch (Exception ex)
@@ -82,6 +86,10 @@ namespace Elk
         }
     }
 
+
+    [ExtApp(Name = "Legend Copy", Description = "Copy a legend view from one sheet to the same location on any other sheet(s).",
+        Guid = "9fa4eed1-4272-4804-a3e3-24609a3a6e33", Vendor = "LOGT", VendorDescription = "LMNts And Timothy Logan",
+        ForceEnabled = false, Commands = new[] { "Legend Copy" })]
     public class LegendCopyApp : IExternalApplication
     {
         public Result OnShutdown(UIControlledApplication application)
@@ -95,14 +103,35 @@ namespace Elk
 
             // Create the PushButtonData
             PushButtonData legendCopyPBD = new PushButtonData(
-                "Legend Copy", "Legend\nCopy", path, "Elk.LegendCopyCmd")
+                "Legend Copy", "Legend\nCopy", path, typeof(LegendCopyCmd).FullName)
             {
                 LargeImage = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(Properties.Resources.Legend_32x32.GetHbitmap(), IntPtr.Zero, System.Windows.Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions()),
                 ToolTip = "Copy a legend view to multiple sheets in the same location.",
             };
+            string panelName = Properties.Settings.Default.PanelName;
+
+            // HKS Centric stuff
+            // ******************************************
+
+            // Set the help file
+            System.IO.FileInfo fi = new System.IO.FileInfo(path);
+            System.IO.DirectoryInfo directory = fi.Directory;
+            string helpPath = directory.FullName + "\\help\\LegendCopy.pdf";
+            ContextualHelp help = new ContextualHelp(ContextualHelpType.ChmFile, helpPath);
+            legendCopyPBD.SetContextualHelp(help);
+            
+            int version = 0;
+            if(int.TryParse(application.ControlledApplication.VersionNumber, out version))
+            {
+                if (version < 2017)
+                    panelName = "Tools";
+            }
+
+            // ******************************************
+            // End of HKS Centric Stuff
 
             // Add the button to the ribbon
-            RevitCommon.UI.AddToRibbon(application, Properties.Settings.Default.TabName, Properties.Settings.Default.PanelName, legendCopyPBD);
+            RevitCommon.UI.AddToRibbon(application, Properties.Settings.Default.TabName, panelName, legendCopyPBD);
 
             return Result.Succeeded;
         }
