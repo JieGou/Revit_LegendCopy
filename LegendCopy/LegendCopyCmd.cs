@@ -22,6 +22,16 @@ namespace Elk
             {
                 UIDocument uiDoc = commandData.Application.ActiveUIDocument;
 
+                int version = Convert.ToInt32(uiDoc.Document.Application.VersionNumber);
+                // Get the Revit window handle
+                IntPtr handle = IntPtr.Zero;
+                if (version < 2019)
+                    handle = System.Diagnostics.Process.GetCurrentProcess().MainWindowHandle;
+                else
+                    handle = commandData.Application.GetType().GetProperty("MainWindowHandle") != null
+                        ? (IntPtr)commandData.Application.GetType().GetProperty("MainWindowHandle").GetValue(commandData.Application)
+                        : IntPtr.Zero;
+
                 // Get the current selection and make sure there's only one item selected.
                 Selection sel = uiDoc.Selection;
                 if (sel.GetElementIds().Count == 1)
@@ -57,9 +67,6 @@ namespace Elk
                             }
 
                             // Pass the location, view, and viewport type to the form
-                            System.Diagnostics.Process proc = System.Diagnostics.Process.GetCurrentProcess();
-                            IntPtr handle = proc.MainWindowHandle;
-
                             LegendCopyForm form = new LegendCopyForm(uiDoc.Document, view, vpTypeId, loc, sheets);
                             System.Windows.Interop.WindowInteropHelper wih = new System.Windows.Interop.WindowInteropHelper(form);
                             wih.Owner = handle;
