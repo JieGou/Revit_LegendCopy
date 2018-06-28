@@ -115,30 +115,66 @@ namespace Elk
                 LargeImage = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(Properties.Resources.Legend_32x32.GetHbitmap(), IntPtr.Zero, System.Windows.Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions()),
                 ToolTip = "Copy a legend view to multiple sheets in the same location.",
             };
-            string panelName = Properties.Settings.Default.PanelName;
+
+
+            // Check for a settings file
+            if (!RevitCommon.FileUtils.GetPluginSettings(typeof(LegendCopyApp).Assembly.GetName().Name, out string helpPath, out string tabName, out string panelName))
+            {
+                // Set the help file path
+                System.IO.FileInfo fi = new System.IO.FileInfo(typeof(LegendCopyApp).Assembly.Location);
+                System.IO.DirectoryInfo directory = fi.Directory;
+                helpPath = directory.FullName + "\\help\\LegendCopy.pdf";
+
+                // Set the tab name
+                tabName = Properties.Settings.Default.TabName;
+                panelName = Properties.Settings.Default.PanelName;
+            }
+            else
+            {
+                // Check for nulls in the returned strings
+                if (helpPath == null)
+                {
+                    // Set the help file path
+                    System.IO.FileInfo fi = new System.IO.FileInfo(typeof(LegendCopyApp).Assembly.Location);
+                    System.IO.DirectoryInfo directory = fi.Directory;
+                    helpPath = directory.FullName + "\\help\\LegendCopy.pdf";
+                }
+
+                if (tabName == null)
+                    tabName = Properties.Settings.Default.TabName;
+
+                if (panelName == null)
+                    panelName = Properties.Settings.Default.PanelName;
+            }
+
+
+            //string panelName = Properties.Settings.Default.PanelName;
 
             // HKS Centric stuff
             // ******************************************
 
             // Set the help file
-            System.IO.FileInfo fi = new System.IO.FileInfo(path);
-            System.IO.DirectoryInfo directory = fi.Directory;
-            string helpPath = directory.FullName + "\\help\\LegendCopy.pdf";
-            ContextualHelp help = new ContextualHelp(ContextualHelpType.ChmFile, helpPath);
-            legendCopyPBD.SetContextualHelp(help);
-            
-            int version = 0;
-            if(int.TryParse(application.ControlledApplication.VersionNumber, out version))
+            //System.IO.FileInfo fi = new System.IO.FileInfo(path);
+            //System.IO.DirectoryInfo directory = fi.Directory;
+            //string helpPath = directory.FullName + "\\help\\LegendCopy.pdf";
+            if (System.IO.File.Exists(helpPath))
             {
-                if (version < 2017)
-                    panelName = "Tools";
+                ContextualHelp help = new ContextualHelp(ContextualHelpType.ChmFile, helpPath);
+                legendCopyPBD.SetContextualHelp(help);
             }
+            
+            //int version = 0;
+            //if(int.TryParse(application.ControlledApplication.VersionNumber, out version))
+            //{
+            //    if (version < 2017)
+            //        panelName = "Tools";
+            //}
 
             // ******************************************
             // End of HKS Centric Stuff
 
             // Add the button to the ribbon
-            RevitCommon.UI.AddToRibbon(application, Properties.Settings.Default.TabName, panelName, legendCopyPBD);
+            RevitCommon.UI.AddToRibbon(application, tabName, panelName, legendCopyPBD);
 
             return Result.Succeeded;
         }
