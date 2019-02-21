@@ -34,53 +34,55 @@ namespace Elk
 
                 // Get the current selection and make sure there's only one item selected.
                 Selection sel = uiDoc.Selection;
-                if (sel.GetElementIds().Count == 1)
+                if(sel.GetElementIds().Count != 1)
                 {
-                    // Get the selected element
-                    Element e = uiDoc.Document.GetElement(sel.GetElementIds().First());
-
-                    // Make sure the element was retrieved and that it's a viewport element
-                    if (e != null && e.Category.Id.IntegerValue == (int)BuiltInCategory.OST_Viewports)
-                    {
-                        // Get the viewport
-                        Viewport vp = e as Viewport;
-
-                        // Get the legend view's name
-                        string viewName = vp.get_Parameter(BuiltInParameter.VIEWPORT_VIEW_NAME).AsString();
-
-                        // Get the viewport type
-                        ElementId vpTypeId = vp.get_Parameter(BuiltInParameter.ELEM_TYPE_PARAM).AsElementId();
-                        View view = uiDoc.Document.GetElement(vp.ViewId) as View;
-
-                        // Make sure the view is a legend view
-                        if (view.ViewType == ViewType.Legend)
-                        {
-                            // Get the location of the viewport
-                            XYZ loc = vp.GetBoxCenter();
-
-                            FilteredElementCollector sheetCollector = new FilteredElementCollector(uiDoc.Document);
-                            sheetCollector.OfClass(typeof(ViewSheet));
-                            List<ViewSheet> sheets = new List<ViewSheet>();
-                            foreach (ViewSheet vs in sheetCollector)
-                            {
-                                sheets.Add(vs);
-                            }
-
-                            // Pass the location, view, and viewport type to the form
-                            LegendCopyForm form = new LegendCopyForm(uiDoc.Document, view, vpTypeId, loc, sheets);
-                            System.Windows.Interop.WindowInteropHelper wih = new System.Windows.Interop.WindowInteropHelper(form);
-                            wih.Owner = handle;
-                            form.ShowDialog();
-                        }
-                        else
-                            TaskDialog.Show("Warning - 2", "Make sure only one Legend Viewport is selected before running this command.");
-                    }
-                    else
-                        TaskDialog.Show("Warning - 1", "Make sure only one Legend Viewport is selected before running this command.");
-                }
-                else
                     TaskDialog.Show("Warning - 0", "Make sure only one Legend Viewport is selected before running this command.");
+                    return Result.Succeeded;
+                }
 
+                
+                // Get the selected element and verify it's a viewport
+                Element e = uiDoc.Document.GetElement(sel.GetElementIds().First());
+                if(e == null || e.Category.Id.IntegerValue != (int)BuiltInCategory.OST_Viewports)
+                {
+                    TaskDialog.Show("Warning - 1", "Make sure only one Legend Viewport is selected before running this command.");
+                    return Result.Succeeded;
+                }
+                
+                
+                // Get the viewport
+                Viewport vp = e as Viewport;
+
+                // Get the legend view's name and viewport type
+                string viewName = vp.get_Parameter(BuiltInParameter.VIEWPORT_VIEW_NAME).AsString();
+                ElementId vpTypeId = vp.get_Parameter(BuiltInParameter.ELEM_TYPE_PARAM).AsElementId();
+                View view = uiDoc.Document.GetElement(vp.ViewId) as View;
+
+                // Make sure the view is a legend view
+                if (view.ViewType != ViewType.Legend)
+                {
+                    TaskDialog.Show("Warning - 2", "Make sure only one Legend Viewport is selected before running this command.");
+                    return Result.Succeeded;
+                }
+
+
+                // Get the location of the viewport
+                XYZ loc = vp.GetBoxCenter();
+
+                FilteredElementCollector sheetCollector = new FilteredElementCollector(uiDoc.Document);
+                sheetCollector.OfClass(typeof(ViewSheet));
+                List<ViewSheet> sheets = new List<ViewSheet>();
+                foreach (ViewSheet vs in sheetCollector)
+                {
+                    sheets.Add(vs);
+                }
+
+                // Pass the location, view, and viewport type to the form
+                LegendCopyForm form = new LegendCopyForm(uiDoc.Document, view, vpTypeId, loc, sheets);
+                System.Windows.Interop.WindowInteropHelper wih = new System.Windows.Interop.WindowInteropHelper(form) { Owner = handle };
+                form.ShowDialog();
+
+                // Log usage
                 RevitCommon.FileUtils.WriteToHome("Legend Copy", commandData.Application.Application.VersionNumber, commandData.Application.Application.Username);
 
                 return Result.Succeeded;
