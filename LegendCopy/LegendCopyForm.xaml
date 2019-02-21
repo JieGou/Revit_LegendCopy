@@ -64,7 +64,7 @@
             </LinearGradientBrush.GradientStops>
         </LinearGradientBrush>
     </Window.Resources>
-    <Border MouseLeftButtonDown="Border_MouseLeftButtonDown" KeyDown="Border_KeyDown">
+    <Border MouseLeftButtonDown="Border_MouseLeftButtonDown">
         <Grid>
             <!--Main Background-->
             <Rectangle Fill="WhiteSmoke" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0"/>

@@ -81,7 +81,7 @@ namespace Elk
                 else
                     TaskDialog.Show("Warning - 0", "Make sure only one Legend Viewport is selected before running this command.");
 
-                RevitCommon.HKS.WriteToHome("Legend Copy", commandData.Application.Application.VersionNumber, commandData.Application.Application.Username);
+                RevitCommon.FileUtils.WriteToHome("Legend Copy", commandData.Application.Application.VersionNumber, commandData.Application.Application.Username);
 
                 return Result.Succeeded;
             }
@@ -94,89 +94,5 @@ namespace Elk
     }
 
 
-    [ExtApp(Name = "Legend Copy", Description = "Copy a legend view from one sheet to the same location on any other sheet(s).",
-        Guid = "9fa4eed1-4272-4804-a3e3-24609a3a6e33", Vendor = "LOGT", VendorDescription = "LMNts And Timothy Logan",
-        ForceEnabled = false, Commands = new[] { "Legend Copy" })]
-    public class LegendCopyApp : IExternalApplication
-    {
-        public Result OnShutdown(UIControlledApplication application)
-        {
-            return Result.Succeeded;
-        }
-
-        public Result OnStartup(UIControlledApplication application)
-        {
-            string path = typeof(LegendCopyApp).Assembly.Location;
-
-            // Create the PushButtonData
-            PushButtonData legendCopyPBD = new PushButtonData(
-                "Legend Copy", "Legend\nCopy", path, typeof(LegendCopyCmd).FullName)
-            {
-                LargeImage = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(Properties.Resources.Legend_32x32.GetHbitmap(), IntPtr.Zero, System.Windows.Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions()),
-                ToolTip = "Copy a legend view to multiple sheets in the same location.",
-            };
-
-
-            // Check for a settings file
-            if (!RevitCommon.FileUtils.GetPluginSettings(typeof(LegendCopyApp).Assembly.GetName().Name, out string helpPath, out string tabName, out string panelName))
-            {
-                // Set the help file path
-                System.IO.FileInfo fi = new System.IO.FileInfo(typeof(LegendCopyApp).Assembly.Location);
-                System.IO.DirectoryInfo directory = fi.Directory;
-                helpPath = directory.FullName + "\\help\\LegendCopy.pdf";
-
-                // Set the tab name
-                tabName = Properties.Settings.Default.TabName;
-                panelName = Properties.Settings.Default.PanelName;
-            }
-            else
-            {
-                // Check for nulls in the returned strings
-                if (helpPath == null)
-                {
-                    // Set the help file path
-                    System.IO.FileInfo fi = new System.IO.FileInfo(typeof(LegendCopyApp).Assembly.Location);
-                    System.IO.DirectoryInfo directory = fi.Directory;
-                    helpPath = directory.FullName + "\\help\\LegendCopy.pdf";
-                }
-
-                if (tabName == null)
-                    tabName = Properties.Settings.Default.TabName;
-
-                if (panelName == null)
-                    panelName = Properties.Settings.Default.PanelName;
-            }
-
-
-            //string panelName = Properties.Settings.Default.PanelName;
-
-            // HKS Centric stuff
-            // ******************************************
-
-            // Set the help file
-            //System.IO.FileInfo fi = new System.IO.FileInfo(path);
-            //System.IO.DirectoryInfo directory = fi.Directory;
-            //string helpPath = directory.FullName + "\\help\\LegendCopy.pdf";
-            if (System.IO.File.Exists(helpPath))
-            {
-                ContextualHelp help = new ContextualHelp(ContextualHelpType.ChmFile, helpPath);
-                legendCopyPBD.SetContextualHelp(help);
-            }
-            
-            //int version = 0;
-            //if(int.TryParse(application.ControlledApplication.VersionNumber, out version))
-            //{
-            //    if (version < 2017)
-            //        panelName = "Tools";
-            //}
-
-            // ******************************************
-            // End of HKS Centric Stuff
-
-            // Add the button to the ribbon
-            RevitCommon.UI.AddToRibbon(application, tabName, panelName, legendCopyPBD);
-
-            return Result.Succeeded;
-        }
-    }
+    
 }

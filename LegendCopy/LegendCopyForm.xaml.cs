@@ -159,34 +159,5 @@ namespace Elk
             displaySheets.Sort((x, y) => x.SheetNumber.CompareTo(y.SheetNumber));
             sheetsListBox.ItemsSource = displaySheets;
         }
-
-        private void Border_KeyDown(object sender, KeyEventArgs e)
-        {
-            if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control) // Is Ctrl key pressed
-            {
-                if (Keyboard.IsKeyDown(Key.U))
-                {
-                    // Launch the UI form
-                    System.Diagnostics.Process proc = System.Diagnostics.Process.GetCurrentProcess();
-                    IntPtr handle = proc.MainWindowHandle;
-                    RevitCommon.UILocation uiForm = new RevitCommon.UILocation("Legend Copy", Properties.Settings.Default.TabName, Properties.Settings.Default.PanelName);
-                    System.Windows.Interop.WindowInteropHelper wih = new System.Windows.Interop.WindowInteropHelper(uiForm);
-                    wih.Owner = handle;
-                    uiForm.ShowDialog();
-
-                    string tab = uiForm.Tab;
-                    string panel = uiForm.Panel;
-
-                    if (tab != Properties.Settings.Default.TabName || panel != Properties.Settings.Default.PanelName)
-                    {
-                        Properties.Settings.Default.TabName = tab;
-                        Properties.Settings.Default.PanelName = panel;
-                        Properties.Settings.Default.Save();
-
-                        Autodesk.Revit.UI.TaskDialog.Show("Warning", "Changes to the panel or tab this tool resides on will take place when Revit restarts.");
-                    }
-                }
-            }
-        }
     }
 }
