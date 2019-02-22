@@ -5,6 +5,7 @@ using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Selection;
 using System.Windows.Media.Imaging;
 using RevitCommon.Attributes;
+using System.Collections.Generic;
 
 namespace Elk
 {
@@ -30,42 +31,36 @@ namespace Elk
                 ToolTip = "Copy a legend view to multiple sheets in the same location.",
             };
 
-
-            // Check for a settings file
-            if (!RevitCommon.FileUtils.GetPluginSettings(typeof(LegendCopyApp).Assembly.GetName().Name, out string helpPath, out string tabName, out string panelName))
+            // Set default config values
+            string helpPath = Path.Combine(Path.GetDirectoryName(typeof(LegendCopyApp).Assembly.Location), "help\\ImportExcel.pdf");
+            string tabName = "Add-Ins";
+            string panelName = "Views";
+            if (RevitCommon.FileUtils.GetPluginSettings(typeof(LegendCopyApp).Assembly.GetName().Name, out Dictionary<string, string> settings))
             {
-                // Set the help file path to a default location
-                helpPath = Path.Combine(Path.GetDirectoryName(typeof(LegendCopyApp).Assembly.Location), "help\\LegendCopy.pdf");
-
-                // Set the tab name
-                tabName = "Add-Ins";
-                panelName = "Views";
-            }
-            else
-            {
-                // Check for nulls in the returned strings
-                if (string.IsNullOrWhiteSpace(helpPath))
-                    helpPath = Path.Combine(Path.GetDirectoryName(typeof(LegendCopyApp).Assembly.Location), "help\\LegendCopy.pdf");
-
-
-                if (string.IsNullOrWhiteSpace(tabName))
-                    tabName = "Add-Ins";
-
-                if (string.IsNullOrWhiteSpace(panelName))
-                    panelName = "Views";
+                // Settings retrieved, lets try to use them.
+                if (settings.ContainsKey("help-path") && !string.IsNullOrWhiteSpace(settings["help-path"]))
+                {
+                    // Check to see if it's relative path
+                    string hp = Path.Combine(Path.GetDirectoryName(typeof(LegendCopyApp).Assembly.Location), settings["help-path"]);
+                    if (File.Exists(hp))
+                        helpPath = hp;
+                    else
+                        helpPath = settings["help-path"];
+                }
+                if (settings.ContainsKey("tab-name") && !string.IsNullOrWhiteSpace(settings["tab-name"]))
+                    tabName = settings["tab-name"];
+                if (settings.ContainsKey("panel-name") && !string.IsNullOrWhiteSpace(settings["panel-name"]))
+                    panelName = settings["panel-name"];
             }
 
             // Setup the help file
-            if(File.Exists(helpPath))
-            {
-                ContextualHelp help = new ContextualHelp(ContextualHelpType.ChmFile, helpPath);
-                legendCopyPBD.SetContextualHelp(help);
-            }
+            ContextualHelp help = null;
+            if (File.Exists(helpPath))
+                help = new ContextualHelp(ContextualHelpType.ChmFile, helpPath);
             else if(Uri.TryCreate(helpPath, UriKind.Absolute, out Uri uriResult) && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps))
-            {
-                ContextualHelp help = new ContextualHelp(ContextualHelpType.Url, helpPath);
+                help = new ContextualHelp(ContextualHelpType.Url, helpPath);
+            if(help != null)
                 legendCopyPBD.SetContextualHelp(help);
-            }
 
             // Add the button to the ribbon
             RevitCommon.UI.AddToRibbon(application, tabName, panelName, legendCopyPBD);
