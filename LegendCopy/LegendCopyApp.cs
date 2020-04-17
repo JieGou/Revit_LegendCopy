@@ -1,11 +1,11 @@
-﻿using System;
-using System.IO;
-using Autodesk.Revit.Attributes;
+﻿using Autodesk.Revit.Attributes;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Selection;
-using System.Windows.Media.Imaging;
 using RevitCommon.Attributes;
+using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Windows.Media.Imaging;
 
 namespace Elk
 {
@@ -43,24 +43,40 @@ namespace Elk
                     // Check to see if it's relative path
                     string hp = Path.Combine(Path.GetDirectoryName(typeof(LegendCopyApp).Assembly.Location), settings["help-path"]);
                     if (File.Exists(hp))
+                    {
                         helpPath = hp;
+                    }
                     else
+                    {
                         helpPath = settings["help-path"];
+                    }
                 }
                 if (settings.ContainsKey("tab-name") && !string.IsNullOrWhiteSpace(settings["tab-name"]))
+                {
                     tabName = settings["tab-name"];
+                }
+
                 if (settings.ContainsKey("panel-name") && !string.IsNullOrWhiteSpace(settings["panel-name"]))
+                {
                     panelName = settings["panel-name"];
+                }
             }
 
             // Setup the help file
             ContextualHelp help = null;
             if (File.Exists(helpPath))
+            {
                 help = new ContextualHelp(ContextualHelpType.ChmFile, helpPath);
-            else if(Uri.TryCreate(helpPath, UriKind.Absolute, out Uri uriResult) && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps))
+            }
+            else if (Uri.TryCreate(helpPath, UriKind.Absolute, out Uri uriResult) && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps))
+            {
                 help = new ContextualHelp(ContextualHelpType.Url, helpPath);
-            if(help != null)
+            }
+
+            if (help != null)
+            {
                 legendCopyPBD.SetContextualHelp(help);
+            }
 
             // Add the button to the ribbon
             RevitCommon.UI.AddToRibbon(application, tabName, panelName, legendCopyPBD);

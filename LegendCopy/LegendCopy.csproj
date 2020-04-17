@@ -58,8 +58,8 @@
       <HintPath>C:\Program Files\Autodesk\Revit 2018\RevitAPIUI.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="RevitCommon, Version=1.3.3.0, Culture=neutral, processorArchitecture=AMD64">
-      <HintPath>..\packages\RevitCommon.1.3.3\lib\net45\RevitCommon.dll</HintPath>
+    <Reference Include="RevitCommon">
+      <HintPath>E:\Source\Repos\RevitCommon\RevitCommon_Package\lib\net45\RevitCommon.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -119,9 +119,9 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>call "$(SolutionDir)Secrets\SignBuild.bat" "$(TargetPath)"</PostBuildEvent>
+    <PostBuildEvent>::call "$(SolutionDir)Secrets\SignBuild.bat" "$(TargetPath)"</PostBuildEvent>
   </PropertyGroup>
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
   </Target>
